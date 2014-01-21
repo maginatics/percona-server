@@ -4365,6 +4365,8 @@ no_gap_lock:
 		/* This is a non-locking consistent read: if necessary, fetch
 		a previous version of the record */
 
+		/* We must go down the READ_UNCOMMITTED path for snapshot
+		databases to avoid issues with invalid undo log entries. */
 		if (trx->isolation_level == TRX_ISO_READ_UNCOMMITTED) {
 
 			/* Do nothing: we let a non-locking SELECT read the

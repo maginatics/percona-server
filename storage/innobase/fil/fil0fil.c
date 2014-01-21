@@ -3456,6 +3456,8 @@ fil_open_single_table_tablespace(
 		/* overwrite fsp header */
 		fsp_header_init_fields(page, id, flags);
 		mach_write_to_4(page + FIL_PAGE_ARCH_LOG_NO_OR_SPACE_ID, id);
+		fprintf(stderr, "InnoDB: remapping page zero of tablespace %lu to %lu\n",
+			(ulong) id, (ulong) space_id);
 		space_id = id;
 		space_flags = flags;
 		if (mach_read_from_8(page + FIL_PAGE_FILE_FLUSH_LSN) > current_lsn)
@@ -3734,6 +3736,10 @@ skip_info:
 					}
 
 					if (mach_read_from_8(page + FIL_PAGE_LSN) > current_lsn) {
+						/* The imported tablespaces can contain LSNs greater than the current
+						one.  We work around this by exclusively using READ_UNCOMMITTED mode
+						which ignores LSNs.  Some background:
+						http://www.mysqlperformanceblog.com/2013/09/11/how-to-move-the-innodb-log-sequence-number-lsn-forward/ */
 						mach_write_to_8(page + FIL_PAGE_LSN, current_lsn);
 						if (!zip_size) {
 							mach_write_to_8(page + UNIV_PAGE_SIZE - FIL_PAGE_END_LSN_OLD_CHKSUM,
@@ -3742,6 +3748,13 @@ skip_info:
 					}
 
 					fil_page_buf_page_store_checksum(page, zip_size);
+
+					/* Expand table import rewrites tablespace IDs on all pages.  Instead
+					rewrite only non-index pages which suffices for read-only access.  This
+					avoids churning pages on LVM-backed volumes. */
+					if (fil_page_get_type(page) == FIL_PAGE_INDEX) {
+						goto skip_write;
+					}
 
 					success = os_file_write(filepath, file, page,
 								(ulint)(offset & 0xFFFFFFFFUL),

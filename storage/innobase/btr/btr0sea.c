@@ -1533,7 +1533,10 @@ btr_search_build_page_hash_index(
 
 	n_cached = 0;
 
-	ut_a(index->id == btr_page_get_index_id(page));
+	/* We must remap index IDs here. */
+	if (index->id != btr_page_get_index_id(page)) {
+		mach_write_to_8(page + PAGE_HEADER + PAGE_INDEX_ID, index->id);
+	}
 
 	rec = page_rec_get_next(page_get_infimum_rec(page));
 

@@ -708,7 +708,11 @@ btr_root_fseg_validate(
 			&& (offset <= UNIV_PAGE_SIZE - FIL_PAGE_DATA_END);
 	}
 
-	ut_a(mach_read_from_4(seg_header + FSEG_HDR_SPACE) == space);
+	/* TODO: we could rewrite the fseg for the root INDEX page (only)
+	during ALTER TABLE IMPORT TABLESPACE. */
+	if (mach_read_from_4(seg_header + FSEG_HDR_SPACE) != space) {
+		mach_write_to_4(seg_header + FSEG_HDR_SPACE, space);
+	}
 	ut_a(offset >= FIL_PAGE_DATA);
 	ut_a(offset <= UNIV_PAGE_SIZE - FIL_PAGE_DATA_END);
 	return(TRUE);

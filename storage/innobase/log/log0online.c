@@ -1092,6 +1092,8 @@ log_online_follow_log_group(
 	} while (block_end_lsn < log_bmp_sys->end_lsn);
 
 	/* Assert that the last read log record is a full one */
+	/* We disable changed page bitmaps on the snapshot VM to avoid
+	asserting here. */
 	ut_a(log_bmp_sys->parse_buf_end == log_bmp_sys->parse_buf);
 }
 

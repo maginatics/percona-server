@@ -3906,6 +3906,20 @@ buf_page_io_complete(
 		} else if ((bpage->space
 			    && bpage->space != read_space_id)
 			   || bpage->offset != read_page_no) {
+			/* fil0fil.c:fil_open_single_table_tablespace remaps
+			tablespace IDs during ALTER TABLE IMPORT without
+			rewriting all pages.  Therefore we remap the
+			expected tablespace ID here.  Note that we could do a
+			more robust remapping using the XtraBackup export
+			file. */
+			fprintf(stderr,
+				"  InnoDB: Remapping space id and page n:o"
+				" %lu:%lu to %lu:%lu.\n",
+				(ulong) read_space_id, (ulong) read_page_no,
+				(ulong) bpage->space,
+				(ulong) bpage->offset);
+			mach_write_to_4(frame + FIL_PAGE_ARCH_LOG_NO_OR_SPACE_ID, bpage->space);
+#if 0
 			/* We did not compare space_id to read_space_id
 			if bpage->space == 0, because the field on the
 			page may contain garbage in MySQL < 4.1.1,
@@ -3920,6 +3934,7 @@ buf_page_io_complete(
 				(ulong) read_space_id, (ulong) read_page_no,
 				(ulong) bpage->space,
 				(ulong) bpage->offset);
+#endif
 		}
 
 		if (UNIV_LIKELY(!bpage->is_corrupt ||
