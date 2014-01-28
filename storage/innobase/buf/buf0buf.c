@@ -601,6 +601,8 @@ buf_page_is_corrupted(
 		return(TRUE);
 	}
 
+/* Ignore unexpected LSNs created by ALTER TABLE IMPORT TABLESPACE. */
+#if 0
 #ifndef UNIV_HOTBACKUP
 	if (check_lsn && recv_lsn_checks_on) {
 		ib_uint64_t	current_lsn;
@@ -628,6 +630,7 @@ buf_page_is_corrupted(
 				current_lsn);
 		}
 	}
+#endif
 #endif
 
 	/* If we use checksums validation, make additional check before
