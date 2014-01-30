@@ -482,6 +482,7 @@ dtype_get_fixed_size_low(
 	case DATA_BINARY:
 	case DATA_DECIMAL:
 	case DATA_VARMYSQL:
+	case DATA_VARINT:
 	case DATA_BLOB:
 		return(0);
 	default:
@@ -550,6 +551,7 @@ dtype_get_min_size_low(
 	case DATA_BINARY:
 	case DATA_DECIMAL:
 	case DATA_VARMYSQL:
+	case DATA_VARINT:
 	case DATA_BLOB:
 		return(0);
 	default:
@@ -582,6 +584,7 @@ dtype_get_max_size_low(
 	case DATA_BINARY:
 	case DATA_DECIMAL:
 	case DATA_VARMYSQL:
+	case DATA_VARINT:
 		return(len);
 	case DATA_BLOB:
 		break;

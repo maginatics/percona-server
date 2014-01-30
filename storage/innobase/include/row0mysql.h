@@ -564,6 +564,7 @@ struct mysql_row_templ_struct {
 					row format */
 	ulint	mysql_col_len;		/*!< length of the column in the MySQL
 					row format */
+					/* stores the field length */
 	ulint	mysql_null_byte_offset;	/*!< MySQL NULL bit byte offset in a
 					MySQL record */
 	ulint	mysql_null_bit_mask;	/*!< bit mask to get the NULL bit,

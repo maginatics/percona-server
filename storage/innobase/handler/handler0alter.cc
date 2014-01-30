@@ -121,6 +121,9 @@ innobase_col_to_mysql(
 		/* We may have flen > len when there is a shorter
 		prefix on a CHAR column. */
 		ut_ad(flen >= len);
+	case DATA_VARINT:
+		// TODO: implement
+		ut_ad(0);
 #else /* UNIV_DEBUG */
 	default:
 #endif /* UNIV_DEBUG */

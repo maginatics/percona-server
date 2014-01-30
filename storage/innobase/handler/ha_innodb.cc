@@ -5334,8 +5334,10 @@ get_innobase_type_from_mysql_type(
 		}
 	case MYSQL_TYPE_NEWDECIMAL:
 		return(DATA_FIXBINARY);
-	case MYSQL_TYPE_LONG:
 	case MYSQL_TYPE_LONGLONG:
+		/* We force all BIGINT to VARINT here -- best solution? */
+		return(DATA_VARINT);
+	case MYSQL_TYPE_LONG:
 	case MYSQL_TYPE_TINY:
 	case MYSQL_TYPE_SHORT:
 	case MYSQL_TYPE_INT24:
@@ -5530,6 +5532,7 @@ ha_innobase::store_key_val_for_row(
 
 			buff += key_len;
 
+		// TODO: handle VARINT here?
 		} else if (mysql_type == MYSQL_TYPE_TINY_BLOB
 			|| mysql_type == MYSQL_TYPE_MEDIUM_BLOB
 			|| mysql_type == MYSQL_TYPE_BLOB
@@ -5859,6 +5862,7 @@ include_field:
 			templ->mysql_length_bytes = (ulint)
 				(((Field_varstring*)field)->length_bytes);
 		}
+		// TODO: populate mysql_length_bytes for VARINT?
 
 		templ->charset = dtype_get_charset_coll(col->prtype);
 		templ->mbminlen = dict_col_get_mbminlen(col);
@@ -7589,6 +7593,7 @@ create_table_def(
 
 		ut_a(field->type() < 256); /* we assume in dtype_form_prtype()
 					   that this fits in one byte */
+		// TODO: does this give a sensible result?
 		col_len = field->pack_length();
 
 		/* The MySQL pack length contains 1 or 2 bytes length field
@@ -7741,6 +7746,7 @@ create_index(
 			prefix_len = key_part->length;
 
 			if (col_type == DATA_INT
+				|| col_type == DATA_VARINT
 				|| col_type == DATA_FLOAT
 				|| col_type == DATA_DOUBLE
 				|| col_type == DATA_DECIMAL) {

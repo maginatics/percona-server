@@ -149,7 +149,7 @@ dfield_check_typed_no_assert(
 /*=========================*/
 	const dfield_t*	field)	/*!< in: data field */
 {
-	if (dfield_get_type(field)->mtype > DATA_MYSQL
+	if (dfield_get_type(field)->mtype > DATA_VARINT
 	    || dfield_get_type(field)->mtype < DATA_VARCHAR) {
 
 		fprintf(stderr,
@@ -209,7 +209,7 @@ dfield_check_typed(
 /*===============*/
 	const dfield_t*	field)	/*!< in: data field */
 {
-	if (dfield_get_type(field)->mtype > DATA_MYSQL
+	if (dfield_get_type(field)->mtype > DATA_VARINT
 	    || dfield_get_type(field)->mtype < DATA_VARCHAR) {
 
 		fprintf(stderr,

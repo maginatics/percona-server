@@ -2437,6 +2437,9 @@ row_sel_convert_mysql_key_to_innobase(
 
 			data_len += 2;
 			data_field_len += 2;
+		} else if (type == DATA_VARINT) {
+			++data_len;
+			++data_field_len;
 		}
 
 		/* Storing may use at most data_len bytes of buf */
@@ -2571,6 +2574,7 @@ row_sel_field_store_in_mysql_format(
 	switch (templ->type) {
 		const byte*	field_end;
 		byte*		pad;
+		int		i;
 	case DATA_INT:
 		/* Convert integer data from Innobase to a little-endian
 		format, sign bit restored to normal */
@@ -2591,6 +2595,24 @@ row_sel_field_store_in_mysql_format(
 		}
 
 		ut_ad(templ->mysql_col_len == len);
+		break;
+
+	case DATA_VARINT:
+		/* Convert integer data from Innobase to a little-endian
+		format, sign bit restored to normal */
+
+		gaul_fprintf(stderr, "row_sel_field_store_in_mysql_format: %lu %lu\n",
+			len, templ->mysql_col_len);
+		ptr = dest + 8;
+
+		for (i = len; i < templ->mysql_col_len; ++i) {
+			*--ptr = 0;
+		}
+		for (i = 0; i < len; ++i) {
+			gaul_fprintf(stderr, "gaul: %i\n", (int) *data);
+			*--ptr = *data++;
+		}
+		// TODO: unsigned
 		break;
 
 	case DATA_VARCHAR:
@@ -3191,6 +3213,7 @@ row_sel_copy_cached_field_for_mysql(
 
 	UNIV_MEM_ASSERT_W(buf, templ->mysql_col_len);
 
+	// TODO: change here when moving to custom length representation
 	if (templ->mysql_type == DATA_MYSQL_TRUE_VARCHAR
 	    && templ->type != DATA_INT) {
 		/* Check for != DATA_INT to make sure we do

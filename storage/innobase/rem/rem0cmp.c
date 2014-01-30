@@ -178,9 +178,36 @@ cmp_whole_field(
 	float		f_2;
 	double		d_1;
 	double		d_2;
+	long long int	i_1;
+	long long int	i_2;
+	int		i;
 	int		swap_flag	= 1;
 
 	switch (mtype) {
+
+	case DATA_VARINT:
+		gaul_fprintf(stderr, "cmp_whole_field lengths: %u %u\n",
+			a_length, b_length);
+		i_1 = 0;
+		i_2 = 0;
+		for (i = 0; i < a_length; ++i) {
+			i_1 <<= 8;
+			i_1 |= (int) a[i];
+		}
+		for (i = 0; i < b_length; ++i) {
+			i_2 <<= 8;
+			i_2 |= (int) b[i];
+		}
+
+		gaul_fprintf(stderr, "cmp_whole_field values: %lli %lli\n",
+			i_1, i_2);
+		if (i_1 > i_2) {
+			return(1);
+		} else if (i_2 > i_1) {
+			return(-1);
+		}
+
+		return(0);
 
 	case DATA_DECIMAL:
 		/* Remove preceding spaces */

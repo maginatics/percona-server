@@ -379,6 +379,36 @@ row_mysql_store_col_in_innobase_format(
 
 		ptr = buf;
 		buf += col_len;
+	} else if (type == DATA_VARINT) {
+		int	leading_zeroes = 0;
+		int	i;
+
+		for (i = 0; i < col_len; ++i) {
+			gaul_fprintf(stderr, "gaul: %i\n", (int) mysql_data[i]);
+		}
+
+		ptr = buf;
+
+		/* count leading (trailing in little endian) zeros */
+		for (i = 0; i < col_len; ++i) {
+			if (mysql_data[col_len - i - 1]) {
+				break;
+			}
+			++leading_zeroes;
+		}
+
+		gaul_fprintf(stderr, "leading_zeroes: %i\n", leading_zeroes);
+
+		for (i = leading_zeroes; i < col_len; ++i) {
+			gaul_fprintf(stderr, "real bytes: %i\n",
+				(int) mysql_data[col_len - i - 1]);
+			*buf++ = mysql_data[col_len - i - 1];
+		}
+
+		/* TODO: unsigned */
+
+		col_len -= leading_zeroes;
+		gaul_fprintf(stderr, "col_len: %lu\n", col_len);
 	} else if ((type == DATA_VARCHAR
 		    || type == DATA_VARMYSQL
 		    || type == DATA_BINARY)) {

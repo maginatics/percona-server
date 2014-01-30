@@ -552,4 +552,10 @@ typedef void* os_thread_ret_t;
 
 extern ulint	srv_page_size_shift;
 extern ulint	srv_page_size;
+
+#if 1
+#define gaul_fprintf(...)
+#else
+#define gaul_fprintf fprintf
+#endif
 #endif

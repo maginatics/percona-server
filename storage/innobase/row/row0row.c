@@ -991,6 +991,7 @@ row_raw_format(
 			goto format_in_hex;
 		}
 		break;
+	// TODO: DATA_VARINT
 	case DATA_CHAR:
 	case DATA_VARCHAR:
 	case DATA_MYSQL:

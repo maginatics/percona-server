@@ -69,6 +69,8 @@ binary strings */
 				DATA_VARMYSQL for all character sets, and the
 				charset-collation for tables created with it
 				can also be latin1_swedish_ci */
+#define DATA_VARINT	14	/* variable-length integer: ranges from 0 - 8
+				bytes depending on magnitude */
 #define DATA_MTYPE_MAX	63	/* dtype_store_for_order_and_null_size()
 				requires the values are <= 63 */
 /*-------------------------------------------*/

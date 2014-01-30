@@ -254,6 +254,10 @@ dtype_print(
 		fputs("DATA_VARMYSQL", stderr);
 		break;
 
+	case DATA_VARINT:
+		fputs("DATA_VARINT", stderr);
+		break;
+
 	default:
 		fprintf(stderr, "type %lu", (ulong) mtype);
 		break;
