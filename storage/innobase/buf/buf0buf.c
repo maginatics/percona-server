@@ -3915,12 +3915,14 @@ buf_page_io_complete(
 			expected tablespace ID here.  Note that we could do a
 			more robust remapping using the XtraBackup export
 			file. */
+#if 0
 			fprintf(stderr,
 				"  InnoDB: Remapping space id and page n:o"
 				" %lu:%lu to %lu:%lu.\n",
 				(ulong) read_space_id, (ulong) read_page_no,
 				(ulong) bpage->space,
 				(ulong) bpage->offset);
+#endif
 			mach_write_to_4(frame + FIL_PAGE_ARCH_LOG_NO_OR_SPACE_ID, bpage->space);
 #if 0
 			/* We did not compare space_id to read_space_id
