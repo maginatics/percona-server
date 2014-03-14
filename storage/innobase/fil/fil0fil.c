@@ -3548,6 +3548,7 @@ skip_info:
 			ulint		offsets_[REC_OFFS_NORMAL_SIZE];
 			ulint*		offsets = offsets_;
 			ib_int64_t	offset;
+			ib_int64_t	page_no;
 
 			size = (ulint) (size_bytes / (zip_size ? zip_size : UNIV_PAGE_SIZE));
 			/* over write space id of all pages */
@@ -3560,10 +3561,27 @@ skip_info:
 
 			fprintf(stderr, "InnoDB: Progress in %%:");
 
-			for (offset = 0; offset < free_limit_bytes;
+			for (offset = 0, page_no = 0; offset < free_limit_bytes; ++page_no,
 			     offset += zip_size ? zip_size : UNIV_PAGE_SIZE) {
 				ibool		page_is_corrupt;
 				ibool		is_descr_page = FALSE;
+
+				/* Expand table import rewrites tablespace IDs on all pages.  Instead
+				rewrite only non-index pages which suffices for read-only access.  This
+				avoids churning pages on LVM-backed volumes. */
+				if (page_no % 16384 > 1 && page_no != 2) {
+					/* InnoDB with file-per-table always has this format for the first three pages:
+					0           FSP_HDR             0           0           654601592600
+					1           IBUF_BITMAP         0           0           621936319664
+					2           INODE               0           0           654601592600
+
+					Every extent has the following types for its first two pages:
+					16384       XDES                0           0           651899218546
+					16385       IBUF_BITMAP         0           0           622312885617
+
+					We rewrite tablespace ids on only these entries. */
+					goto skip_write;
+				}
 
 				success = os_file_read(file, page,
 							(ulint)(offset & 0xFFFFFFFFUL),
@@ -3748,13 +3766,6 @@ skip_info:
 					}
 
 					fil_page_buf_page_store_checksum(page, zip_size);
-
-					/* Expand table import rewrites tablespace IDs on all pages.  Instead
-					rewrite only non-index pages which suffices for read-only access.  This
-					avoids churning pages on LVM-backed volumes. */
-					if (fil_page_get_type(page) == FIL_PAGE_INDEX) {
-						goto skip_write;
-					}
 
 					success = os_file_write(filepath, file, page,
 								(ulint)(offset & 0xFFFFFFFFUL),
