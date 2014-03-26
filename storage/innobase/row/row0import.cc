@@ -3572,7 +3572,9 @@ row_import_for_mysql(
 		FetchIndexRootPages	fetchIndexRootPages(table, trx);
 
 		err = fil_tablespace_iterate(
-			table, IO_BUFFER_SIZE(cfg.m_page_size),
+			/* Operate on single pages since converter will only read
+			a small number of non-INDEX pages. */
+			table, 1,
 			fetchIndexRootPages);
 
 		if (err == DB_SUCCESS) {
@@ -3608,7 +3610,9 @@ row_import_for_mysql(
 	/* Set the IO buffer size in pages. */
 
 	err = fil_tablespace_iterate(
-		table, IO_BUFFER_SIZE(cfg.m_page_size), converter);
+		/* Operate on single pages since converter will only read
+		a small number of non-INDEX pages. */
+		table, 1, converter);
 
 	DBUG_EXECUTE_IF("ib_import_reset_space_and_lsn_failure",
 			err = DB_TOO_MANY_CONCURRENT_TRXS;);

@@ -6082,6 +6082,8 @@ fil_iterate(
 	ulint			space_id = callback.get_space_id();
 	ulint			n_bytes = iter.n_io_buffers * iter.page_size;
 
+	/* we expect only a single page buffer */
+	ut_ad(iter.n_io_buffers == 1);
 	ut_ad(!srv_read_only_mode);
 
 	/* TODO: For compressed tables we do a lot of useless
@@ -6116,6 +6118,28 @@ fil_iterate(
 
 		ut_ad(n_bytes > 0);
 		ut_ad(!(n_bytes % iter.page_size));
+
+                /* Expand table import rewrites tablespace IDs on all pages.
+                Instead rewrite only non-index pages which suffices for
+                read-only access.  This avoids churning pages on LVM-backed
+                volumes. */
+                if (page_no % 16384 > 1 && page_no != 2) {
+                        /* InnoDB with file-per-table always has this format
+                        for the first three pages:
+                        0           FSP_HDR             0           0           654601592600
+                        1           IBUF_BITMAP         0           0           621936319664
+                        2           INODE               0           0           654601592600
+
+                        Every extent has the following types for its first two
+                        pages:
+                        16384       XDES                0           0           651899218546
+                        16385       IBUF_BITMAP         0           0           622312885617
+
+                        We rewrite tablespace ids on only these entries. */
+                        ++page_no;
+                        continue;
+                }
+
 
 		if (!os_file_read(iter.file, io_buffer, offset,
 				  (ulint) n_bytes)) {

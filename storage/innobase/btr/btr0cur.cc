@@ -775,7 +775,10 @@ retry_page_get:
 	}
 
 	ut_ad(fil_page_get_type(page) == FIL_PAGE_INDEX);
+	// we expect the incorrect index id here
+#if 0
 	ut_ad(index->id == btr_page_get_index_id(page));
+#endif
 
 	if (UNIV_UNLIKELY(height == ULINT_UNDEFINED)) {
 		/* We are in the root node */
@@ -989,7 +992,10 @@ btr_cur_open_at_index_side_func(
 
 		ut_ad(fil_page_get_type(page) == FIL_PAGE_INDEX);
 
+		// we expect the incorrect index id here
+#if 0
 		ut_ad(index->id == btr_page_get_index_id(page));
+#endif
 
 		block->check_index_page_at_flush = TRUE;
 
