@@ -190,6 +190,9 @@ UNIV_INTERN ulonglong	srv_max_changed_pages = 0;
     When FALSE, row locks are not taken at all. */
 UNIV_INTERN my_bool	srv_fake_changes_locks = TRUE;
 
+/* When TRUE, fast import of tablespace is enabled */
+UNIV_INTERN my_bool	srv_fast_import_tablespace = FALSE;
+
 /* if TRUE, then we auto-extend the last data file */
 UNIV_INTERN ibool	srv_auto_extend_last_data_file	= FALSE;
 /* if != 0, this tells the max size auto-extending may increase the

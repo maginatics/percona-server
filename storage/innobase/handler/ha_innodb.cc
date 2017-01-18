@@ -17512,6 +17512,11 @@ static MYSQL_SYSVAR_BOOL(locking_fake_changes, srv_fake_changes_locks,
   "not take any locks at all.",
   NULL, NULL, TRUE);
 
+static MYSQL_SYSVAR_BOOL(fast_import_tablespace, srv_fast_import_tablespace,
+  PLUGIN_VAR_OPCMDARG,
+  "Enable fast import of tablespace with READ UNCOMMITED (off by default)",
+  NULL, NULL, FALSE);
+
 static struct st_mysql_sys_var* innobase_system_variables[]= {
   MYSQL_SYSVAR(log_block_size),
   MYSQL_SYSVAR(additional_mem_pool_size),
@@ -17700,6 +17705,7 @@ static struct st_mysql_sys_var* innobase_system_variables[]= {
   MYSQL_SYSVAR(corrupt_table_action),
   MYSQL_SYSVAR(fake_changes),
   MYSQL_SYSVAR(locking_fake_changes),
+  MYSQL_SYSVAR(fast_import_tablespace),
   NULL
 };
 

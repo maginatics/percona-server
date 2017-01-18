@@ -4321,10 +4321,11 @@ wrong_offs:
 	/* Calculate the 'offsets' associated with 'rec' */
 
 	ut_ad(fil_page_get_type(btr_pcur_get_page(pcur)) == FIL_PAGE_INDEX);
-	// we expect the incorrect index id here
-#if 0
-	ut_ad(btr_page_get_index_id(btr_pcur_get_page(pcur)) == index->id);
-#endif
+
+	// we expect the incorrect index id here if fast import is enabled
+	if (!srv_fast_import_tablespace) {
+		ut_ad(btr_page_get_index_id(btr_pcur_get_page(pcur)) == index->id);
+	}
 
 	offsets = rec_get_offsets(rec, index, offsets, ULINT_UNDEFINED, &heap);
 
@@ -4582,7 +4583,8 @@ no_gap_lock:
 		a previous version of the record */
 
 		/* We must go down the READ_UNCOMMITTED path for snapshot
-		databases to avoid issues with invalid undo log entries. */
+		   databases (fast import enabled) to avoid issues with invalid
+		   undo log entries. */
 		if (trx->isolation_level == TRX_ISO_READ_UNCOMMITTED) {
 
 			/* Do nothing: we let a non-locking SELECT read the

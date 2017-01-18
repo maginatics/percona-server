@@ -1933,6 +1933,10 @@ innobase_start_or_create_for_mysql(void)
 		unit = 'M';
 	}
 
+	/* Print fast tablespace import flag */
+	ib_logf(IB_LOG_LEVEL_INFO,
+		"Initializing fast tablespace import = %u", srv_fast_import_tablespace);
+
 	/* Print time to initialize the buffer pool */
 	ib_logf(IB_LOG_LEVEL_INFO,
 		"Initializing buffer pool, size = %.1f%c", size, unit);

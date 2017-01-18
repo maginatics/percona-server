@@ -523,8 +523,8 @@ buf_page_is_corrupted(
 		return(TRUE);
 	}
 
-/* Ignore unexpected LSNs created by ALTER TABLE IMPORT TABLESPACE. */
-#if 0
+	/* Ignore unexpected LSNs created by ALTER TABLE IMPORT TABLESPACE. */
+	if (!srv_fast_import_tablespace) {
 #ifndef UNIV_HOTBACKUP
 	if (check_lsn && recv_lsn_checks_on) {
 		lsn_t	current_lsn;
@@ -557,7 +557,7 @@ buf_page_is_corrupted(
 		}
 	}
 #endif
-#endif
+	}
 
 	/* Check whether the checksum fields have correct values */
 
@@ -4105,37 +4105,40 @@ buf_page_io_complete(
 		} else if ((bpage->space
 			    && bpage->space != read_space_id)
 			   || bpage->offset != read_page_no) {
-			/* fil0fil.c:fil_open_single_table_tablespace remaps
-			tablespace IDs during ALTER TABLE IMPORT without
-			rewriting all pages.  Therefore we remap the
-			expected tablespace ID here.  Note that we could do a
-			more robust remapping using the XtraBackup export
-			file. */
-#if 0
-			fprintf(stderr,
-			        "  InnoDB: Remapping space id and page n:o"
-			        " %lu:%lu to %lu:%lu.\n",
-			        (ulong) read_space_id, (ulong) read_page_no,
-			        (ulong) bpage->space,
-			        (ulong) bpage->offset);
-#endif
-			mach_write_to_4(frame + FIL_PAGE_ARCH_LOG_NO_OR_SPACE_ID, bpage->space);
-#if 0
-			/* We did not compare space_id to read_space_id
-			if bpage->space == 0, because the field on the
-			page may contain garbage in MySQL < 4.1.1,
-			which only supported bpage->space == 0. */
 
-			ut_print_timestamp(stderr);
-			fprintf(stderr,
-				"  InnoDB: Error: space id and page n:o"
-				" stored in the page\n"
-				"InnoDB: read in are %lu:%lu,"
-				" should be %lu:%lu!\n",
-				(ulong) read_space_id, (ulong) read_page_no,
-				(ulong) bpage->space,
-				(ulong) bpage->offset);
+			if (srv_fast_import_tablespace) {
+				/* fil0fil.c:fil_open_single_table_tablespace remaps
+				tablespace IDs during ALTER TABLE IMPORT without
+				rewriting all pages.  Therefore we remap the
+				expected tablespace ID here.  Note that we could do a
+				more robust remapping using the XtraBackup export
+				file. */
+#if 0
+				fprintf(stderr,
+				        "  InnoDB: Remapping space id and page n:o"
+				        " %lu:%lu to %lu:%lu.\n",
+				        (ulong) read_space_id, (ulong) read_page_no,
+				        (ulong) bpage->space,
+				        (ulong) bpage->offset);
 #endif
+				mach_write_to_4(frame + FIL_PAGE_ARCH_LOG_NO_OR_SPACE_ID, bpage->space);
+			}
+			if (!srv_fast_import_tablespace) {
+				/* We did not compare space_id to read_space_id
+				if bpage->space == 0, because the field on the
+				page may contain garbage in MySQL < 4.1.1,
+				which only supported bpage->space == 0. */
+
+				ut_print_timestamp(stderr);
+				fprintf(stderr,
+					"  InnoDB: Error: space id and page n:o"
+					" stored in the page\n"
+					"InnoDB: read in are %lu:%lu,"
+					" should be %lu:%lu!\n",
+					(ulong) read_space_id, (ulong) read_page_no,
+					(ulong) bpage->space,
+					(ulong) bpage->offset);
+			}
 		}
 
 		if (UNIV_LIKELY(!bpage->is_corrupt ||

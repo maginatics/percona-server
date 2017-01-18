@@ -585,6 +585,8 @@ extern srv_stats_t	srv_stats;
 When FALSE, row locks are not taken at all. */
 extern my_bool srv_fake_changes_locks;
 
+/* Fast import of tablespaces if isolation level is read_uncommitted */
+extern my_bool srv_fast_import_tablespace;
 
 # ifdef UNIV_PFS_THREAD
 /* Keys to register InnoDB threads with performance schema */
